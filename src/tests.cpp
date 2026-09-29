@@ -1,4 +1,5 @@
 #include "tests.h"
+#include <cmath>
 
 // 练习1，实现库函数strlen
 int my_strlen(char *str) {
@@ -7,7 +8,12 @@ int my_strlen(char *str) {
      */
 
     // IMPLEMENT YOUR CODE HERE
-    return 0;
+    int cnt = 0;
+    while(*str != '\0'){
+        str++;
+        cnt++;
+    }
+    return cnt;
 }
 
 
@@ -19,6 +25,13 @@ void my_strcat(char *str_1, char *str_2) {
      */
 
     // IMPLEMENT YOUR CODE HERE
+    str_1 += my_strlen(str_1);
+    while(*str_2 != '\0'){
+        *str_1 = *str_2;
+        str_1++;
+        str_2++;
+    }
+    *str_1 = '\0';
 }
 
 
@@ -31,6 +44,22 @@ char* my_strstr(char *s, char *p) {
      */
 
     // IMPLEMENT YOUR CODE HERE
+    char *m = s;
+    char *n = p;
+    while(*s != '\0'){
+        if(*s == *p){
+            bool b = true;
+            m = s;
+            while(*n != '\0'){
+                if(*m != *n){
+                    n = p;
+                    b = false;
+                    break;
+                }m++;n++;
+            }if(b) return s;
+        }
+        s++;
+    }
     return 0;
 }
 
@@ -97,6 +126,13 @@ void rgb2gray(float *in, float *out, int h, int w) {
 
     // IMPLEMENT YOUR CODE HERE
     // ...
+    for(int i = 0;i < h*w;i++){
+        float R = *in++;
+        float G = *in++;
+        float B = *in++;
+        *out = 0.1140 * B  + 0.5870 * G + 0.2989 * R;
+        out++;
+    }
 }
 
 // 练习5，实现图像处理算法 resize：缩小或放大图像
@@ -198,7 +234,26 @@ void resize(float *in, float *out, int h, int w, int c, float scale) {
 
     int new_h = h * scale, new_w = w * scale;
     // IMPLEMENT YOUR CODE HERE
-
+    for(int i = 0;i < new_h;i++){
+        for(int j = 0;j < new_w;j++){
+            float x0 = j / scale,y0 = i / scale;
+            int x1 = static_cast<int>(x0), y1 = static_cast<int>(y0);
+            int x2 = x1 + 1,y2 = y1 + 1;
+            if(x1 == w - 1) x2 = x1;
+            if(y1 == h - 1) y2 = y1;
+            float *temin1 = in + y2*w*c + x1*c;
+            float *temin2 = in + y2*w*c + x2*c;
+            float *temin3 = in + y1*w*c + x1*c;
+            float *temin4 = in + y1*w*c + x2*c;
+            float dx0 = x0 - x1,dy0 = y0 - y1;
+            for(int k = 0;k < c;k++){
+                *out = (dx0 * *temin2 + (1-dx0)* *temin1)* dy0 
+                        + (1-dy0)*(dx0* *temin4 + (1-dx0)* *temin3);
+                out++;
+                temin1++;temin2++;temin3++;temin4++;
+            }
+        }
+    }
 }
 
 
@@ -221,4 +276,32 @@ void hist_eq(float *in, int h, int w) {
      */
 
     // IMPLEMENT YOUR CODE HERE
+    float arr[256] = {0};
+    float *tem = in;
+    int total = h*w;
+    for(int i = 0;i < total;i++){
+        int c = round(*tem);
+        arr[c]++;
+        tem++;
+    }
+    float arr_min = arr[0];
+    for(int i = 1;i < 256;i++){
+        arr[i] += arr[i-1];
+        if(arr[i-1] == 0 && arr[i] > 0) arr_min = arr[i];  //记录最小值
+    }
+    for(int i = 0;i < 256;i++){
+        if(arr[i] == 0) continue; 
+        else{
+            arr[i] = (arr[i] - arr_min)/(total - arr_min) * 255;
+            //进行四舍五入
+            if(arr[i] - (int)arr[i] < 0.5) arr[i] = (int)arr[i];
+            else arr[i] = (int)arr[i] + 1;   //也可使用round()直接实现四舍五入，但需引入头文件cmath
+        }
+    }
+    tem = in;
+    for(int i = 0;i < total;i++){
+        int c = round(*tem);
+        *tem = arr[c];
+        tem++;
+    }
 }
