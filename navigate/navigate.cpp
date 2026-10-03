@@ -96,30 +96,30 @@ class MAP : public MAP_BASE{
 			int dirs[4][2] = {{-1,0},{0,1},{1,0},{0,-1}};  //定义偏移量
 			//定义父节点，实现路径记录
 			vector<vector<pair<int,int>>> parent(14,vector<pair<int,int>>(71,{-1,-1})) ;//定义，顺带初始化
-			if(map_in[start.first][start.second] == '#' || map_in[end.first][end.second] == '#') {
+			if(map_in[start.first][start.second] == '#' || map_in[end.first][end.second] == '#') { //特判起点或终点为障碍物
 				cout << "起点或终点为障碍" << endl;
 				return;
 			}
-			queue<pair<int,int>> q;
+			queue<pair<int,int>> q;  //定义队列
 			q.push(start);
-			visit[start.first][start.second] = true;
+			visit[start.first][start.second] = true; //起点入队并标记
 			while(!q.empty()) {
 				int size = q.size();
 				bool for_m = false;
-				for(int i = 0;i < size;i++){
+				for(int i = 0;i < size;i++){ //遍历每一层节点
 					pair<int,int> curr = q.front(); q.pop();
 					if(curr == end) { //到终点了
 						for_m = true;
 						break;
 					}
 					int x = curr.first , y = curr.second;
-					for(auto &dir : dirs){
+					for(auto &dir : dirs){  //遍历上下左右四个方向
 						int xx = x + dir[0];
 						int yy = y + dir[1];
 						//边界检查：
 						if(xx >= 1 && xx < 13 && yy >= 1 && yy < 70 && visit[xx][yy] == false && map_in[xx][yy] == '.'){
 							bool is = true;
-							for(int i = -1;i < 2;i++){
+							for(int i = -1;i < 2;i++){ //判断3X3空间
 								for(int j = -1;j < 2;j++){
 									if(map_in[xx+i][yy+j] == '#') is = false;
 								}
@@ -131,9 +131,9 @@ class MAP : public MAP_BASE{
 						}
 					}
 				}
-				if(for_m) break;
+				if(for_m) break;  //到达终点 退出while循环
 			}
-			queue<pair<int,int>> path;
+			queue<pair<int,int>> path;  //定义path队列，实现从终点到起点的路径还原
 			path.push(end);
 			int par_x = end.first , par_y = end.second;
 			while(parent[par_x][par_y] != pair<int,int>{-1,-1}){
@@ -141,7 +141,7 @@ class MAP : public MAP_BASE{
 				auto s = parent[par_x][par_y];
 				par_x = s.first , par_y = s.second;
 			} //路径记录完毕
-			while(!path.empty()){
+			while(!path.empty()){ //根据path的记录还原路径
 				pair<int,int> curr = path.front();path.pop();
 				map_in[curr.first][curr.second] = 'C';
 			}

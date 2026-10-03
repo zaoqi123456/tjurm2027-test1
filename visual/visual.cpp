@@ -51,7 +51,7 @@ private:
     Enemy arr[4];
     int index = 0;
 public:
-    Enemy find_tar(){
+    Enemy find_tar(){ //找到并返回打击目标
         int tar_index = 0;
         double tar_dis = arr[0].get_dis();
         for(int i = 1;i < 4;i++){
@@ -63,7 +63,7 @@ public:
         cout << "anser: " << arr[tar_index].get_id() << endl;
         return arr[tar_index];
     }
-    void write(Enemy &ene){
+    void write(Enemy &ene){ //把Enemy类写入Target
         arr[index] = ene;
         index++;
     }
